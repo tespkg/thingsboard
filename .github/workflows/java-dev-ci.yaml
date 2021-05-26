@@ -1,0 +1,77 @@
+#
+# Copyright © 2016-2021 The Thingsboard Authors
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+#
+
+name: dev ci
+
+on:
+  push:
+    branches: [master]
+  pull_request:
+    branches: [master]
+
+jobs:
+  build_test:
+    runs-on: [ubuntu-latest]
+    steps:
+      - uses: actions/checkout@v2
+
+      - name: Set up JDK 11
+        uses: actions/setup-java@v2
+        with:
+          java-version: '11'
+          distribution: 'adopt'
+
+      - name: Cache Maven packages
+        uses: actions/cache@v2
+        with:
+          path: ~/.m2
+          key: ${{ runner.os }}-m2-${{ hashFiles('**/pom.xml') }}
+          restore-keys: ${{ runner.os }}-m2
+
+  #     - name: Cache Gradle packages
+  #       uses: actions/cache@v2
+  #       with:
+  #         path: |
+  #           ~/.gradle/caches
+  #           ~/.gradle/wrapper
+  #         key: ${{ runner.os }}-gradle-${{ hashFiles('**/*.gradle*', '**/gradle-wrapper.properties') }}
+  #         restore-keys: |
+  #           ${{ runner.os }}-gradle-
+
+      - name: Maven Clean Install
+        run: mvn clean install -DskipTests -Ddocker.repo=tespkg -Ddockerfile.skip=false
+
+      - name: Push images to dockerhub
+        run: |
+          # Login to docker hub
+          echo ${{ secrets.DOCKERHUB_TOKEN }} | docker login -u ${{ secrets.DOCKERHUB_USERNAME }} --password-stdin
+          # tag image with github short sha
+          docker tag tespkg/tb-postgres:latest tespkg/tb-postgres:${GITHUB_SHA::8}
+          # push all manually
+          docker push tespkg/tb-snmp-transport \
+              tespkg/tb-lwm2m-transport \
+              tespkg/tb-coap-transport  \
+              tespkg/tb-http-transport  \
+              tespkg/tb-mqtt-transport  \
+              tespkg/tb-node            \
+              tespkg/tb-web-ui          \
+              tespkg/tb-js-executor     \
+              tespkg/tb-cassandra       \
+              tespkg/tb-postgres        \
+              tespkg/tb                 \
+              ;
+
+
