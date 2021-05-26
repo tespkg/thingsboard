@@ -51,49 +51,10 @@ jobs:
   #         restore-keys: |
   #           ${{ runner.os }}-gradle-
 
-      - name: Package
-        run: mvn clean install -DskipTests
+      - name: Login to dockerhub
+        run: |
+          echo ${{ secrets.DOCKERHUB_TOKEN }} | docker login -u ${{ secrets.DOCKERHUB_USERNAME }} --password-stdin
 
-  # package_docker:
-  #   runs-on: [self-hosted, linux]
-  #   needs:
-  #     - build_test
-  #   steps:
-  #     - name: Download build
-  #       uses: actions/download-artifact@v2
-  #       with:
-  #         name: build
+      - name: Maven Clean Install
+        run: mvn clean install -DskipTests -Ddocker.repo=tespkg -Ddockerfile.skip=false
 
-  #     - name: Docker image name env
-  #       run: |
-  #         echo "IMAGE_NAME=ghcr.io/${GITHUB_REPOSITORY}:${GITHUB_SHA::8}" >> $GITHUB_ENV
-  #         # echo "GITLAB_IMAGE_NAME=registry.gitlab.com/target-digital-transformation/df/dynamic-catalog-service/github:${GITHUB_SHA::8}" >> $GITHUB_ENV
-
-  #     - name: Build docker image
-  #       # permission change due to: actions/upload-artifact#38
-  #       run: |
-
-
-  #     - name: Push image to github container registry
-  #       run: |
-  #         echo ${{ secrets.CR_PAT }} | docker login ghcr.io -u ${{ secrets.CR_USER }} --password-stdin
-  #         docker push $IMAGE_NAME
-
-  #     - name: Push image to gitlab registry
-  #       run: |
-  #         echo ${{ secrets.GITLAB_CR_PAT }} | docker login registry.gitlab.com -u ${{ secrets.GITLAB_CR_USER }} --password-stdin
-  #         docker tag $IMAGE_NAME $GITLAB_IMAGE_NAME
-  #         docker push $GITLAB_IMAGE_NAME
-
-  # deploy_to_dev:
-  #   runs-on: [self-hosted, linux]
-  #   needs:
-  #     - package_docker
-  #   steps:
-  #     - name: Push to ArgoCD
-  #       run: |
-  #         echo "TODO"
-  #         echo "$IMAGE_NAME"
-  #         echo "$GITLAB_IMAGE_NAME"
-  #         echo ${{ env.IMAGE_NAME }}
-  #         echo ${{ env.GITLAB_IMAGE_NAME }}
