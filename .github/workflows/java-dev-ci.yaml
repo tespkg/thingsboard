@@ -51,10 +51,27 @@ jobs:
   #         restore-keys: |
   #           ${{ runner.os }}-gradle-
 
-      - name: Login to dockerhub
-        run: |
-          echo ${{ secrets.DOCKERHUB_TOKEN }} | docker login -u ${{ secrets.DOCKERHUB_USERNAME }} --password-stdin
-
       - name: Maven Clean Install
         run: mvn clean install -DskipTests -Ddocker.repo=tespkg -Ddockerfile.skip=false
+
+      - name: Push images to dockerhub
+        run: |
+          # Login to docker hub
+          echo ${{ secrets.DOCKERHUB_TOKEN }} | docker login -u ${{ secrets.DOCKERHUB_USERNAME }} --password-stdin
+          # tag image with github short sha
+          docker tag tespkg/tb-postgres:latest tespkg/tb-postgres:${GITHUB_SHA::8}
+          # push all manually
+          docker push tespkg/tb-snmp-transport \
+              tespkg/tb-lwm2m-transport \
+              tespkg/tb-coap-transport  \
+              tespkg/tb-http-transport  \
+              tespkg/tb-mqtt-transport  \
+              tespkg/tb-node            \
+              tespkg/tb-web-ui          \
+              tespkg/tb-js-executor     \
+              tespkg/tb-cassandra       \
+              tespkg/tb-postgres        \
+              tespkg/tb                 \
+              ;
+
 
