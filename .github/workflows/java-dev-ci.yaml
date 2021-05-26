@@ -61,17 +61,14 @@ jobs:
           # tag image with github short sha
           docker tag tespkg/tb-postgres:latest tespkg/tb-postgres:${GITHUB_SHA::8}
           # push all manually
-          docker push tespkg/tb-snmp-transport \
-              tespkg/tb-lwm2m-transport \
-              tespkg/tb-coap-transport  \
-              tespkg/tb-http-transport  \
-              tespkg/tb-mqtt-transport  \
-              tespkg/tb-node            \
-              tespkg/tb-web-ui          \
-              tespkg/tb-js-executor     \
-              tespkg/tb-cassandra       \
-              tespkg/tb-postgres        \
-              tespkg/tb                 \
-              ;
-
-
+          docker push tespkg/tb
+          docker push tespkg/tb-postgres
+          docker push tespkg/tb-snmp-transport
+          docker push tespkg/tb-lwm2m-transport
+          docker push tespkg/tb-coap-transport
+          docker push tespkg/tb-http-transport
+          docker push tespkg/tb-mqtt-transport
+          docker push tespkg/tb-node
+          docker push tespkg/tb-web-ui
+          docker push tespkg/tb-js-executor
+          docker push tespkg/tb-cassandra
