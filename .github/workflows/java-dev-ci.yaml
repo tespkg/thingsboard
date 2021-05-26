@@ -36,7 +36,7 @@ jobs:
   #           ${{ runner.os }}-gradle-
 
       - name: Package
-        run: mvn package
+        run: mvn package -Dmaven.test.skip=true
 
   # package_docker:
   #   runs-on: [self-hosted, linux]
