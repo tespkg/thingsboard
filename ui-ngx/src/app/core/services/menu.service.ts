@@ -14,17 +14,17 @@
 /// limitations under the License.
 ///
 
-import { Injectable } from '@angular/core';
-import { AuthService } from '../auth/auth.service';
-import { select, Store } from '@ngrx/store';
-import { AppState } from '../core.state';
-import { selectAuth, selectIsAuthenticated } from '../auth/auth.selectors';
-import { take } from 'rxjs/operators';
-import { HomeSection, MenuSection } from '@core/services/menu.models';
-import { BehaviorSubject, Observable, Subject } from 'rxjs';
-import { Authority } from '@shared/models/authority.enum';
-import { guid } from '@core/utils';
-import { AuthState } from '@core/auth/auth.models';
+import {Injectable} from '@angular/core';
+import {AuthService} from '../auth/auth.service';
+import {select, Store} from '@ngrx/store';
+import {AppState} from '../core.state';
+import {selectAuth, selectIsAuthenticated} from '../auth/auth.selectors';
+import {take} from 'rxjs/operators';
+import {HomeSection, MenuSection} from '@core/services/menu.models';
+import {BehaviorSubject, Observable, Subject} from 'rxjs';
+import {Authority} from '@shared/models/authority.enum';
+import {guid} from '@core/utils';
+import {AuthState} from '@core/auth/auth.models';
 
 @Injectable({
   providedIn: 'root'
@@ -52,16 +52,16 @@ export class MenuService {
           let homeSections: Array<HomeSection>;
           switch (authState.authUser.authority) {
             case Authority.SYS_ADMIN:
-              menuSections = this.buildSysAdminMenu(authState);
-              homeSections = this.buildSysAdminHome(authState);
+              menuSections = this.encapsulateThingsboardMenu(this.buildSysAdminMenu(authState));
+              homeSections = this.encapsulateThingsboardHomeMenu(this.buildSysAdminHome(authState));
               break;
             case Authority.TENANT_ADMIN:
-              menuSections = this.buildTenantAdminMenu(authState);
-              homeSections = this.buildTenantAdminHome(authState);
+              menuSections = this.encapsulateThingsboardMenu(this.buildTenantAdminMenu(authState));
+              homeSections = this.encapsulateThingsboardHomeMenu(this.buildTenantAdminHome(authState));
               break;
             case Authority.CUSTOMER_USER:
-              menuSections = this.buildCustomerUserMenu(authState);
-              homeSections = this.buildCustomerUserHome(authState);
+              menuSections = this.encapsulateThingsboardMenu(this.buildCustomerUserMenu(authState));
+              homeSections = this.encapsulateThingsboardHomeMenu(this.buildCustomerUserHome(authState));
               break;
           }
           this.menuSections$.next(menuSections);
@@ -71,16 +71,28 @@ export class MenuService {
     );
   }
 
+  private encapsulateThingsboardMenu(menuItems: Array<MenuSection>): Array<MenuSection> {
+    const sections: Array<MenuSection> = [];
+    sections.push({
+      id: guid(),
+      name: 'Thingsboard',
+      type: 'toggle',
+      path: '/',
+      notExact: false,
+      isMdiIcon: true,
+      icon: 'thingsboard_selected',
+      pages: menuItems
+    });
+    return sections;
+  }
+
+  private encapsulateThingsboardHomeMenu(menuItems: Array<HomeSection>): Array<HomeSection> {
+    return menuItems;
+  }
+
   private buildSysAdminMenu(authState: AuthState): Array<MenuSection> {
     const sections: Array<MenuSection> = [];
     sections.push(
-      {
-        id: guid(),
-        name: 'home.home',
-        type: 'link',
-        path: '/home',
-        icon: 'home'
-      },
       {
         id: guid(),
         name: 'tenant.tenants',
@@ -232,86 +244,85 @@ export class MenuService {
     sections.push(
       {
         id: guid(),
-        name: 'home.home',
-        type: 'link',
-        path: '/home',
-        notExact: true,
-        icon: 'home'
-      },
-      {
-        id: guid(),
         name: 'rulechain.rulechains',
         type: 'link',
         path: '/ruleChains',
-        icon: 'settings_ethernet'
+        isMdiIcon: true,
+        icon: 'rule_chains'
       },
       {
         id: guid(),
         name: 'customer.customers',
         type: 'link',
         path: '/customers',
-        icon: 'supervisor_account'
+        isMdiIcon: true,
+        icon: 'customer'
       },
       {
         id: guid(),
         name: 'asset.assets',
         type: 'link',
         path: '/assets',
-        icon: 'domain'
+        isMdiIcon: true,
+        icon: 'assets'
       },
       {
         id: guid(),
         name: 'device.devices',
         type: 'link',
         path: '/devices',
-        icon: 'devices_other'
+        isMdiIcon: true,
+        icon: 'device'
       },
       {
         id: guid(),
         name: 'device-profile.device-profiles',
         type: 'link',
         path: '/deviceProfiles',
-        icon: 'mdi:alpha-d-box',
-        isMdiIcon: true
+        isMdiIcon: true,
+        icon: 'device_profiles'
       },
       {
         id: guid(),
-        name: 'firmware.firmware',
+        name: 'ota-update.ota-updates',
         type: 'link',
-        path: '/firmwares',
-        icon: 'memory'
+        isMdiIcon: true,
+        icon: 'firmware'
+        path: '/otaUpdates',
       },
       {
         id: guid(),
         name: 'entity-view.entity-views',
         type: 'link',
         path: '/entityViews',
-        icon: 'view_quilt'
+        isMdiIcon: true,
+        icon: 'entity_views'
       }
     );
     if (authState.edgesSupportEnabled) {
       sections.push(
         {
           id: guid(),
+          name: 'edge.edge-instances',
+          type: 'link',
+          path: '/edgeInstances',
+          icon: 'router'
+        },
+        {
+          id: guid(),
           name: 'edge.management',
           type: 'toggle',
-          path: '/edges',
-          height: '80px',
-          icon: 'router',
+          path: '/edgeManagement',
+          height: '40px',
+          icon: 'settings_input_antenna',
           pages: [
-            {
-              id: guid(),
-              name: 'edge.edge-instances',
-              type: 'link',
-              path: '/edges',
-              icon: 'router'
-            },
             {
               id: guid(),
               name: 'edge.rulechain-templates',
               type: 'link',
-              path: '/edges/ruleChains',
-              icon: 'settings_ethernet'
+              isMdiIcon: true,
+              path: '/edgeManagement/ruleChains',
+              icon: 'rule_chains'
             }
           ]
         }
@@ -323,29 +334,33 @@ export class MenuService {
         name: 'widget.widget-library',
         type: 'link',
         path: '/widgets-bundles',
-        icon: 'now_widgets'
+        isMdiIcon: true,
+        icon: 'widgets_library'
       },
       {
         id: guid(),
         name: 'dashboard.dashboards',
         type: 'link',
         path: '/dashboards',
-        icon: 'dashboards'
+        isMdiIcon: true,
+        icon: 'dashboard'
       },
       {
         id: guid(),
         name: 'audit-log.audit-logs',
         type: 'link',
         path: '/auditLogs',
-        icon: 'track_changes'
+        isMdiIcon: true,
+        icon: 'adit_usage'
       },
       {
         id: guid(),
         name: 'api-usage.api-usage',
         type: 'link',
         path: '/usage',
-        icon: 'insert_chart',
-        notExact: true
+        notExact: true,
+        isMdiIcon: true,
+        icon: 'api_usage'
       },
       {
         id: guid(),
@@ -353,7 +368,8 @@ export class MenuService {
         type: 'toggle',
         path: '/settings',
         height: '80px',
-        icon: 'settings',
+        isMdiIcon: true,
+        icon: 'home_settings',
         pages: [
           {
             id: guid(),
@@ -367,7 +383,8 @@ export class MenuService {
             name: 'resource.resources-library',
             type: 'link',
             path: '/settings/resources-library',
-            icon: 'folder'
+            isMdiIcon: true,
+            icon: 'resources_library'
           }
         ]
       }
@@ -383,8 +400,9 @@ export class MenuService {
         places: [
           {
             name: 'rulechain.rulechains',
-            icon: 'settings_ethernet',
-            path: '/ruleChains'
+            path: '/ruleChains',
+            isMdiIcon: true,
+            icon: 'rule_chains'
           }
         ]
       },
@@ -393,8 +411,9 @@ export class MenuService {
         places: [
           {
             name: 'customer.customers',
-            icon: 'supervisor_account',
-            path: '/customers'
+            path: '/customers',
+            isMdiIcon: true,
+            icon: 'customer'
           }
         ]
       },
@@ -403,8 +422,9 @@ export class MenuService {
         places: [
           {
             name: 'asset.assets',
-            icon: 'domain',
-            path: '/assets'
+            path: '/assets',
+            isMdiIcon: true,
+            icon: 'assets'
           }
         ]
       },
@@ -413,19 +433,21 @@ export class MenuService {
         places: [
           {
             name: 'device.devices',
-            icon: 'devices_other',
-            path: '/devices'
+            path: '/devices',
+            isMdiIcon: true,
+            icon: 'device'
           },
           {
             name: 'device-profile.device-profiles',
-            icon: 'mdi:alpha-d-box',
+            path: '/deviceProfiles',
             isMdiIcon: true,
-            path: '/deviceProfiles'
+            icon: 'device_profiles'
           },
           {
-            name: 'firmware.firmware',
-            icon: 'memory',
-            path: '/firmwares'
+            name: 'ota-update.ota-updates',
+            isMdiIcon: true,
+            icon: 'firmware',
+            path: '/otaUpdates'
           }
         ]
       },
@@ -434,8 +456,9 @@ export class MenuService {
         places: [
           {
             name: 'entity-view.entity-views',
-            icon: 'view_quilt',
-            path: '/entityViews'
+            path: '/entityViews',
+            isMdiIcon: true,
+            icon: 'entity_views'
           }
         ]
       }
@@ -448,12 +471,13 @@ export class MenuService {
             {
               name: 'edge.edge-instances',
               icon: 'router',
-              path: '/edges'
+              path: '/edgeInstances'
             },
             {
               name: 'edge.rulechain-templates',
-              icon: 'settings_ethernet',
-              path: '/edges/ruleChains'
+              path: '/edgeManagement/ruleChains',
+              isMdiIcon: true,
+              icon: 'rule_chains'
             }
           ]
         }
@@ -465,13 +489,15 @@ export class MenuService {
         places: [
           {
             name: 'widget.widget-library',
-            icon: 'now_widgets',
-            path: '/widgets-bundles'
+            path: '/widgets-bundles',
+            isMdiIcon: true,
+            icon: 'widgets_library'
           },
           {
             name: 'dashboard.dashboards',
-            icon: 'dashboard',
-            path: '/dashboards'
+            path: '/dashboards',
+            isMdiIcon: true,
+            icon: 'dashboard'
           }
         ]
       },
@@ -480,13 +506,15 @@ export class MenuService {
         places: [
           {
             name: 'audit-log.audit-logs',
-            icon: 'track_changes',
-            path: '/auditLogs'
+            path: '/auditLogs',
+            isMdiIcon: true,
+            icon: 'adit_usage'
           },
           {
             name: 'api-usage.api-usage',
-            icon: 'insert_chart',
-            path: '/usage'
+            path: '/usage',
+            isMdiIcon: true,
+            icon: 'api_usage'
           }
         ]
       },
@@ -495,13 +523,15 @@ export class MenuService {
         places: [
           {
             name: 'admin.home-settings',
-            icon: 'settings_applications',
-            path: '/settings/home'
+            path: '/settings/home',
+            isMdiIcon: true,
+            icon: 'home_settings'
           },
           {
             name: 'resource.resources-library',
-            icon: 'folder',
-            path: '/settings/resources-library'
+            path: '/settings/resources-library',
+            isMdiIcon: true,
+            icon: 'resources_library'
           }
         ]
       }
@@ -514,32 +544,27 @@ export class MenuService {
     sections.push(
       {
         id: guid(),
-        name: 'home.home',
-        type: 'link',
-        path: '/home',
-        notExact: true,
-        icon: 'home'
-      },
-      {
-        id: guid(),
         name: 'asset.assets',
         type: 'link',
         path: '/assets',
-        icon: 'domain'
+        isMdiIcon: true,
+        icon: 'assets'
       },
       {
         id: guid(),
         name: 'device.devices',
         type: 'link',
         path: '/devices',
-        icon: 'devices_other'
+        isMdiIcon: true,
+        icon: 'device'
       },
       {
         id: guid(),
         name: 'entity-view.entity-views',
         type: 'link',
         path: '/entityViews',
-        icon: 'view_quilt'
+        isMdiIcon: true,
+        icon: 'entity_views'
       }
     );
     if (authState.edgesSupportEnabled) {
@@ -548,7 +573,7 @@ export class MenuService {
           id: guid(),
           name: 'edge.edge-instances',
           type: 'link',
-          path: '/edges',
+          path: '/edgeInstances',
           icon: 'router'
         }
       );
@@ -559,6 +584,7 @@ export class MenuService {
         name: 'dashboard.dashboards',
         type: 'link',
         path: '/dashboards',
+        isMdiIcon: true,
         icon: 'dashboard'
       }
     );
@@ -573,8 +599,9 @@ export class MenuService {
         places: [
           {
             name: 'asset.assets',
-            icon: 'domain',
-            path: '/assets'
+            path: '/assets',
+            isMdiIcon: true,
+            icon: 'assets'
           }
         ]
       },
@@ -583,8 +610,9 @@ export class MenuService {
         places: [
           {
             name: 'device.devices',
-            icon: 'devices_other',
-            path: '/devices'
+            path: '/devices',
+            isMdiIcon: true,
+            icon: 'device'
           }
         ]
       },
@@ -593,8 +621,9 @@ export class MenuService {
         places: [
           {
             name: 'entity-view.entity-views',
-            icon: 'view_quilt',
-            path: '/entityViews'
+            path: '/entityViews',
+            isMdiIcon: true,
+            icon: 'entity_views'
           }
         ]
       }
@@ -606,8 +635,8 @@ export class MenuService {
           places: [
             {
               name: 'edge.edge-instances',
-              icon: 'router',
-              path: '/edges'
+              icon: 'settings_input_antenna',
+              path: '/edgeInstances'
             }
           ]
         }
@@ -619,8 +648,9 @@ export class MenuService {
         places: [
           {
             name: 'dashboard.dashboards',
-            icon: 'dashboard',
-            path: '/dashboards'
+            path: '/dashboards',
+            isMdiIcon: true,
+            icon: 'dashboard'
           }
         ]
       }

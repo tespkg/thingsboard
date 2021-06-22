@@ -14,16 +14,20 @@
 /// limitations under the License.
 ///
 
-import { Component, Input, OnInit } from '@angular/core';
+import { ChangeDetectionStrategy, Component, Input, OnInit } from '@angular/core';
 import { MenuSection } from '@core/services/menu.models';
 import { Router } from '@angular/router';
 
 @Component({
   selector: 'tb-menu-toggle',
   templateUrl: './menu-toggle.component.html',
-  styleUrls: ['./menu-toggle.component.scss']
+  styleUrls: ['./menu-toggle.component.scss'],
+  changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class MenuToggleComponent implements OnInit {
+
+  private showTooltip = false;
+  private closing = false;
 
   @Input() section: MenuSection;
 
@@ -45,7 +49,25 @@ export class MenuToggleComponent implements OnInit {
     }
   }
 
-  trackBySectionPages(index: number, section: MenuSection){
+  mouseEnter() {
+    this.closing = false;
+    this.showTooltip = true;
+  }
+
+  mouseLeave() {
+    this.closing = true;
+    setTimeout(() => {
+      if (this.closing) {
+        this.showTooltip = false;
+      }
+    }, 200);
+  }
+
+  shouldShow() {
+    return this.showTooltip;
+  }
+
+  trackBySectionPages(index: number, section: MenuSection) {
     return section.id;
   }
 }
