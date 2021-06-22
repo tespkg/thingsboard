@@ -144,6 +144,8 @@ export class DashboardPageComponent extends PageComponent implements IDashboardC
 
   authUser: AuthUser = this.authState.authUser;
 
+  defaultDashboardLogo = '';
+
   @Input()
   embedded = false;
 
