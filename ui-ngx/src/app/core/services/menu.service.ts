@@ -287,7 +287,7 @@ export class MenuService {
         name: 'ota-update.ota-updates',
         type: 'link',
         isMdiIcon: true,
-        icon: 'firmware'
+        icon: 'firmware',
         path: '/otaUpdates',
       },
       {
