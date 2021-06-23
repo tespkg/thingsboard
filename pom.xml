@@ -761,6 +761,7 @@
                     <artifactId>license-maven-plugin</artifactId>
                     <version>3.0</version>
                     <configuration>
+                        <skip>true</skip>
                         <header>${main.dir}/license-header-template.txt</header>
                         <properties>
                             <owner>The Thingsboard Authors</owner>
@@ -804,9 +805,6 @@
                             <exclude>**/*.raw</exclude>
                             <exclude>**/apache/cassandra/io/**</exclude>
                             <exclude>.run/**</exclude>
-                            <exclude>**/*.html</exclude>
-                            <exclude>**/*.ts</exclude>
-                            <exclude>**/*.scss</exclude>
                         </excludes>
                         <mapping>
                             <proto>JAVADOC_STYLE</proto>
