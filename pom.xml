@@ -804,6 +804,9 @@
                             <exclude>**/*.raw</exclude>
                             <exclude>**/apache/cassandra/io/**</exclude>
                             <exclude>.run/**</exclude>
+                            <exclude>**/*.html</exclude>
+                            <exclude>**/*.ts</exclude>
+                            <exclude>**/*.scss</exclude>
                         </excludes>
                         <mapping>
                             <proto>JAVADOC_STYLE</proto>
